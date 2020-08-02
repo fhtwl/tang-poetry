@@ -9,22 +9,43 @@
 		{
 			"path": "pages/search/search",
 			"style": {
-				"navigationBarTitleText": "每日推荐"
+				"navigationBarTitleText": "搜索"
+			}
+		},
+		{
+			"path": "pages/user/user",
+			"style": {
+				"navigationBarTitleText": "搜索"
 			}
 		}
 	],
 	"tabBar": {
-		"color": "#7a7e83",
-		"selectedColor": "#0faeff",
+		"color": "#d3dbe3",
+		"selectedColor": "#f9a035",
 		"backgroundColor": "#ffffff",
 		"list": [
 			{
 				"pagePath": "pages/recommend/recommend",
 				"text": "推荐",
-				"iconPath": "static/images/common/home.png",
-				"selectedIconPath": "static/images/common/homeHL.png"
+				"iconPath": "static/images/wxsy-icon.png",
+				"selectedIconPath": "static/images/xzsy-icon.png"
+			},
+			{
+				"pagePath": "pages/search/search",
+				"text": "搜索",
+				"iconPath": "static/images/wxwode-icon.png",
+				"selectedIconPath": "static/images/xzwode-icon.png"
+			},
+			{
+				"pagePath": "pages/user/user",
+				"text": "我的",
+				"iconPath": "static/images/wxwode-icon.png",
+				"selectedIconPath": "static/images/xzwode-icon.png"
 			}
 		]
+	},
+	"easycom": {
+		"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
