@@ -46,6 +46,10 @@
 					currentPage: this.currentPage
 				})
 				this.list = res.data.data
+				// const sss = this.list.map(function (item) {
+				//     return item.value;
+				// }).join(',');
+				// console.log(sss)
 			},
 			async collection(poetryId,authorId) {
 				let res = await setCollection({

@@ -9,13 +9,17 @@
 					<u-input type="password" v-model="form.secret" :password-icon="true" />
 				</u-form-item>
 			</u-form>
-			<u-button type="primary" @click="submit">提交</u-button>
+			<u-button :disabled="disabled" type="primary" @click="submit">
+				提交
+			</u-button>
 		</view>
-	<u-input v-model="value" :type="type" :border="border" :password-icon="passwordIcon" />	
+		<u-toast ref="uToast" />
+	<!-- <u-input v-model="value" :type="type" :border="border" :password-icon="passwordIcon" />	 -->
 	</view>
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex';
+import { emailLogin } from '@/api/user/emailLogin.js';
 export default {
 	data() {
 		return {
@@ -44,6 +48,8 @@ export default {
 			type: 'password',
 			passwordIcon: true,
 			border: true,
+			disabled:false
+			
 		};
 	},
 	mounted() {
@@ -51,7 +57,34 @@ export default {
 	},
 	methods: {
 		async submit() {
-			let tokenRes = await emailLogin(this.form);
+			this.disabled = true
+			this.$refs.uForm.validate(async valid => {
+				if (valid) {
+					let tokenRes = await emailLogin(this.form);
+					const errCode = tokenRes.statusCode.toString()
+					if(errCode.startsWith('2')) {
+						let token = {
+							token:tokenRes.data.token,
+							time:new Date().getTime()
+						}
+						uni.setStorageSync('token', JSON.stringify(token));
+						uni.navigateBack({
+							
+						})
+					}
+					else {
+						this.disabled = false
+						this.$refs.uToast.show({
+							title: tokenRes.data.msg,
+							// 如果不传此type参数，默认为default，也可以手动写上 type: 'default'
+							type: 'error', 
+						})
+					}
+				} else {
+					this.disabled = false
+				}
+			});
+			
 		}
 	},
 	onShow() {},
@@ -63,10 +96,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
-	// .form {
-	// 	width:100%;
-	// 	box-sizing: border-box;
-	// 	padding:20rpx 30rpx;
-	// }
+	.form {
+		width:100%;
+		box-sizing: border-box;
+		padding:20rpx 30rpx;
+	}
 	
 </style>

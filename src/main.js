@@ -18,8 +18,10 @@ Vue.use(httpInterceptor, app)
 import $http from '@/common/http/http.js'
 Vue.use($http)
 
+Vue.prototype.$store = store
 
 const app = new Vue({
-  ...App
+	store,
+	...App
 })
 app.$mount()
