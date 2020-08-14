@@ -1,6 +1,8 @@
 <template>
-	<view class="content">
-		
+	<view class="body">
+		<view class="bg">
+			
+		</view>
 	</view>
 </template>
 
@@ -20,11 +22,20 @@
 </script>
 
 <style scoped lang="scss">
-	.content {
+	.body {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+		// background:url(~@/static/images/bg.png) no-repeat top center;
+		// background-size:100% auto;
+		width:100%;
+		height:100vh;
+		flex:1;
+		.bg {
+			// background:url(~@/static/images/bg5.jpeg);
+			
+		}
 	}
 
 	.logo {

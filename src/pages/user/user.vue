@@ -9,7 +9,7 @@
 				<view class="u-font-18 u-p-b-20">{{ userInfo.nick_name }}</view>
 				<view class="u-font-14 u-tips-color">普通用户</view>
 			</view>
-			<view class="u-flex-1" v-show="!userInfo.nick_name">
+			<view @tap="goLogin" class="u-flex-1" v-show="!userInfo.nick_name">
 				<view class="u-font-14 u-tips-color">登录</view>
 			</view>
 			<view class="u-m-l-10 u-p-10">
@@ -18,7 +18,7 @@
 		</view>
 		<view class="u-m-t-20">
 			<u-cell-group>
-				<u-cell-item icon="star" title="收藏"></u-cell-item>
+				<u-cell-item @tap="goCollection" icon="star" title="收藏"></u-cell-item>
 				<u-cell-item icon="heart" title="好友"></u-cell-item>
 			</u-cell-group>
 		</view>
@@ -26,10 +26,10 @@
 		<view class="u-m-t-20">
 			<u-cell-group>
 				<u-cell-item icon="setting" title="设置"></u-cell-item>
-				<u-cell-item icon="close-circle" title="推出登录"></u-cell-item>
+				<u-cell-item v-if="!!token" @tap="open" icon="close-circle" title="退出登录"></u-cell-item>
 			</u-cell-group>
 		</view>
-		<view class="btn">
+	<!-- 	<view class="btn">
 			<u-button type="primary" @getuserinfo="toLogin" open-type="getUserInfo">微信登录/未注册会直接注册</u-button>
 		</view>
 		<view class="btn">
@@ -40,7 +40,8 @@
 		</view>
 		<view class="btn">
 			<u-button @click="verify" type="primary" class="btn">验证token</u-button>
-		</view>
+		</view> -->
+		<u-modal v-model="show" :content="content" @confirm="cancellation" :show-cancel-button="true"></u-modal>
 		<u-toast ref="uToast" />
 	</view>
 </template>
@@ -50,18 +51,20 @@
 	import { getToken } from '@/api/user/getToken.js';
 	import { verifyToken } from '@/api/user/verifyToken.js'; 
 	import { getUserInfo } from '@/api/user/getUserInfo.js';
+	import { cancellation } from '@/api/user/cancellation.js';
 	export default {
 		data() {
 			let userInfo = this.$store.state.userInfo
 			userInfo.info ? userInfo.info : userInfo.info = {avatar:''}
+			let token = this.isLogin()
 			return {
-				encryptedData:'',
-				iv:'',
-				code:'',
-				userInfo: userInfo
+				userInfo: userInfo,
+				token: token,
+				show: false,
+				content: '确认退出登录？'
 			}
 		},
-		async mounted() {
+		async onShow() {
 			await this.getUserInfo()
 			
 		},
@@ -73,114 +76,67 @@
 			}
 		},
 		methods:{
-			toLogin(e) {
-				var _this=this;
-				if(e.detail.errMsg == "getUserInfo:ok") {
-					_this.encryptedData = e.detail.encryptedData
-					_this.iv = e.detail.iv;
-					uni.login({
-						provider: 'weixin',
-						success: async (loginRes)=> {
-							if(loginRes.code){
-								_this.code=loginRes.code;
-								// uni.request({
-								// 	url: 'http://127.0.0.1:3000/app/api/v1/token',
-								// 	method: 'POST',
-								// 	data: {
-								// 		type: 100,
-								// 		code: this.code
-								// 	},
-								// 	success: (res)=> {
-								// 		console.log(res)
-								// 	}
-								// })
-								let tokenRes = await getToken({
-									type: 100,
-									code: _this.code
-								});
-								const errCode = tokenRes.statusCode.toString()
-								if(errCode.startsWith('2')) {
-									let token = {
-										token:tokenRes.data.token,
-										time:new Date().getTime()
-									}
-									uni.setStorageSync('token', JSON.stringify(token));
-								}
-								console.log(tokenRes)
-								// _this.$http.request({
-								// 	url: '/token',
-								// 	data: {
-								// 		type: 100,
-								// 		code: this.code
-								// 	},
-								// 	success: (res)=> {
-								// 		console.log(res)
-								// 	}
-								// })
-							}
-						},
+			open() {
+				this.show = true;
+				
+			},
+			async cancellation() {
+				let token = this.isLogin()
+				const res = await cancellation({token})
+				if(res.data.success) {
+					this.$store.commit('modifyUserInfo',{info:{avatar:''}})
+					uni.removeStorageSync('token')
+					this.token = ''
+					this.userInfo = {info:{avatar:''}}
+					this.$refs.uToast.show({
+						title: '退出登录成功',
+						type: 'success', 
 					})
-					// _this.login_phone()
 				}
 				else {
-					
+					this.$refs.uToast.show({
+						title: '退出登录失败',
+						type: 'success', 
+					})
 				}
 			},
-			goUserNameRegister() {
-				uni.navigateTo({
-					url: '/pages/user/loginPage/register'
-				})
+			cancel() {
+				
 			},
-			goUserNameLogin() {
-				uni.navigateTo({
-					url: '/pages/user/loginPage/login'
-				})
-			},
-			async verify() {
-				let token = ''
-				let ret = uni.getStorageSync('token');
-				if (!ret) {
-					ret = '[]';
+			goCollection() {
+				if(!this.isLogin()) {
+					this.$refs.uToast.show({
+						title: '请先登录',
+						type: 'error', 
+					})
+					return false
 				}
-				token = JSON.parse(ret);
-				console.log(token)
-				const result = await verifyToken(token)
+				uni.navigateTo({
+					url: '/pages/user/collection/collection'
+				})
 			},
 			async getUserInfo() {
-				let token = ''
-				let ret = uni.getStorageSync('token');
-				if (!ret) {
-					ret = '[]';
-				}
-				token = JSON.parse(ret);
+				let token = this.isLogin()
 				const res = await getUserInfo({token})
 				const result = res.data
 				console.log(result)
 				if(result.success) {
 					this.$store.commit('modifyUserInfo',result.data)
 					this.userInfo = result.data
-					console.log(this.userInfo)
 				}
 				else {
-					
 				}
 			},
+			goLogin() {
+				uni.navigateTo({
+					url: '/pages/user/loginPage/loginType'
+				})
+			}
 		}
 	}
 </script>
 
 <style scoped lang="scss">
-	.body {
-		padding:0 20rpx;
-		background:#ededed;
-		box-sizing: border-box;
-		.btn {
-			margin-bottom:20rpx;
-			.login {
-				font-size: 30rpx;
-			}
-		}
-	}
 	.camera{
 		width: 54px;
 		height: 44px;

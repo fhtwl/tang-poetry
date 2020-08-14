@@ -9,14 +9,8 @@ import uView from "uview-ui";
 Vue.use(uView);
 import store from './store'
 
-
-// http拦截器，此为需要加入的内容，如果不是写在common目录，请自行修改引入路径
-import httpInterceptor from '@/common/http.interceptor.js'
-// 这里需要写在最后，是为了等Vue创建对象完成，引入"app"对象(也即页面的"this"实例)
-Vue.use(httpInterceptor, app)
-
-import $http from '@/common/http/http.js'
-Vue.use($http)
+import isLogin from '@/utils/isLogin.js'
+Vue.use(isLogin)
 
 Vue.prototype.$store = store
 

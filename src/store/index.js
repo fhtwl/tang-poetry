@@ -7,7 +7,7 @@ const store = new Vuex.Store({
 	state: {
 		// domain: 'https://dev.sgcctd.cn',
 		// domain: 'https://test.sgcctd.cn',
-		domain: 'https://crplingxi.com.cn',
+		domain: '127.0.0.1:3000',
 		// domain:'https://hzkjapp.sgcctd.cn',
 		// apiName:'/api/eeumWGW',
 		apiName:'/api/open',

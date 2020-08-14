@@ -1,13 +1,11 @@
 import { http } from '@/utils/service.js' // 全局挂载引入，配置相关在该index.js文件里修改
 let $http = http;
-const setCollection = (data) => {
+const queryCollectionList = (data) => {
 	return new Promise((resolve, reject) => {
-		let result = $http.get('/collection/poetry',{
+		let result = $http.get('/collection/queryCollectionList',{
 			params:{
-				type: data.type,
-				poetryId: data.poetryId,
-				authorId: data.authorId,
-				collectionId: data.collectionId,
+				limit: data.limit,
+				currentPage: data.currentPage,
 				token: data.token
 			}
 		}).then(res => {
@@ -18,5 +16,5 @@ const setCollection = (data) => {
  
 }
 module.exports = {
-	setCollection
+	queryCollectionList
 }

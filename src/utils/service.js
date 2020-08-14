@@ -54,9 +54,9 @@ http.interceptors.request.use((config) => { /* 请求之前拦截器。可以使
 	// console.log(config)
 	let requestType = config.method;
 	if (requestType == 'GET') {
-		config.params.token = getTokenStorage();
+		// config.params.token = getTokenStorage();
 	} else if (requestType == 'POST') {
-		config.params.token = getTokenStorage();
+		// config.params.token = getTokenStorage();s
 	}
 	return config
 }, (config) => {

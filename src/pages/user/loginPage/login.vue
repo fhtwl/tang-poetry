@@ -71,6 +71,9 @@ export default {
 						uni.navigateBack({
 							
 						})
+						uni.reLaunch({
+							url:'/pages/user/user'
+						})
 					}
 					else {
 						this.disabled = false
