@@ -1,5 +1,5 @@
 <template>
-	<view class="body">
+	<view class="body" @touchmove.stop.prevent>
 		<view class="head">
 			<u-search placeholder="请输入作者/标题/诗文关键字" v-model="keyword" @custom="query(true)" @search="query(true)"></u-search>
 		</view>
@@ -19,18 +19,12 @@
 					</view>
 				</view>
 			</view> -->
-			<view class="example" @touchmove.stop.prevent>
-				<hr-pull-load
-				 @refresh='refresh'
-				 @loadMore='loadMore'
-				 :height='windowHeight'
-				 :pullHeight='50'
-				 :maxHeight='100'
-				 :lowerThreshold='20'
-				 :bottomTips='bottomTips'
-				 :isTab='false'
-				 ref='hrPullLoad'>
-				 <!-- 插入自己的数据-->
+			<mescroll-body ref="mescrollRef" @init="mescrollInit" @down="downCallback" @up="upCallback" :down="downOption" :up="upOption">
+<!-- 					 //  @init="mescrollInit" @down="downCallback" @up="upCallback"为固定值,不可删改(与mescroll-mixins保持一致) 
+					 // :down="downOption" :up="upOption" 绝大部分情况无需配置 
+					 // :top="顶部偏移量" :bottom="底部偏移量" :topbar="状态栏" :safearea="安全区" (常用)
+					 // 字节跳动小程序 ref="mescrollRef" 必须配置 
+					 // 此处支持写入原生组件 -->
 					<view @tap="goDetails(item.id)" class="item" v-for="(item,index) in list" :key="index">
 						<view class="title">
 							{{ item.title }}
@@ -46,8 +40,8 @@
 							</view>
 						</view>
 					</view>
-				</hr-pull-load>
-			</view>
+			</mescroll-body>
+			
 		</view>
 		<u-toast ref="uToast" />
 	</view>

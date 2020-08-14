@@ -29,7 +29,7 @@
 
 		<view class="item animate4">
 			<view class="name">
-				<view class="yuan"></view>
+				<view class="yuan bg-black"></view>
 				简介
 			</view>
 			<br />
@@ -37,7 +37,7 @@
 				
 				{{ info.intro }}
 			</view> -->
-			<view class="intro">{{ info.intro }}</view>
+			<view class="intro black">{{ info.intro }}</view>
 		</view>
 		<u-toast ref="uToast" />
 	</view>
