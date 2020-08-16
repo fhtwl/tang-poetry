@@ -1,98 +1,90 @@
 <template>
-	<view class="body" @touchmove.stop.prevent>
+	<view class="body">
 		<view class="head">
-			<u-search placeholder="请输入作者/标题/诗文关键字" v-model="keyword" @custom="query(true)" @search="query(true)"></u-search>
-		</view>
-		<view class="list">
-			<!-- <view class="item" v-for="(item,index) in list" :key="index">
-				<view class="title">
-					{{ item.title }}
-				</view>
-				<view class="author">
-					{{ item.author }}
-				</view>
-				<view class="content" v-html="format(item.content)"></view>
-				<view class="operation">
-					<view class="left">
-						<u-icon @tap="collection(item.id,item.author_id)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="28"></u-icon>
-						<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon>
-					</view>
-				</view>
-			</view> -->
-			<mescroll-body ref="mescrollRef" @init="mescrollInit" @down="downCallback" @up="upCallback" :down="downOption" :up="upOption">
-<!-- 					 //  @init="mescrollInit" @down="downCallback" @up="upCallback"为固定值,不可删改(与mescroll-mixins保持一致) 
-					 // :down="downOption" :up="upOption" 绝大部分情况无需配置 
-					 // :top="顶部偏移量" :bottom="底部偏移量" :topbar="状态栏" :safearea="安全区" (常用)
-					 // 字节跳动小程序 ref="mescrollRef" 必须配置 
-					 // 此处支持写入原生组件 -->
-					<view @tap="goDetails(item.id)" class="item" v-for="(item,index) in list" :key="index">
-						<view class="title">
-							{{ item.title }}
-						</view>
-						<view class="author">
-							{{ item.author }}
-						</view>
-						<view class="content" v-html="format(item.content)"></view>
-						<view class="operation">
-							<view class="left">
-								<u-icon @tap="collection(item.id,item.author_id,index)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="28"></u-icon>
-								<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon>
-							</view>
-						</view>
-					</view>
-			</mescroll-body>
+		 	<u-search placeholder="请输入作者/标题/诗文关键字" v-model="keyword" @custom="query(true)" @search="query(true)"></u-search>
+		 </view>	
+		<mescroll-body ref="mescrollRef" :textNoMore="textNoMore" :textLoading="textLoading" @init="mescrollInit" :down="downOption"  :up="upOption" @down="downCallback" @up="upCallback">
 			
-		</view>
-		<u-toast ref="uToast" />
+			 <u-toast ref="uToast" />
+			<view class="list">
+			 	<view @tap="goDetails(item.id)" class="item" v-for="(item,index) in list" :key="index">
+			 		<view class="title">
+			 			{{ item.title }}
+			 		</view>
+			 		<view class="author">
+			 			{{ item.author }}
+			 		</view>
+			 		<view class="content" v-html="format(item.content)"></view>
+			 		<view class="operation">
+			 			<view class="left">
+			 				<u-icon @tap="collection(item.id,item.author_id,index)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="28"></u-icon>
+			 				<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon>
+			 			</view>
+			 		</view>
+			 	</view>
+			</view>
+		</mescroll-body>
 	</view>
+	
 </template>
 
 <script>
+	import MescrollMixin from "@/components/common/mescroll-uni/mescroll-mixins.js";
+	// import {apiNewList} from "@/api/mock.js"
 	import { search } from '@/api/search/search.js';
 	import { setCollection } from '@/api/collection/setCollection.js';
-	// import sibList from '@/components/common/sib-list/sib-list.vue'
 	import hrPullLoad from '@/components/common/hr-pull-load/hr-pull-load.vue'
+	import MescrollBodyDiy from "@/components/common/mescroll-diy/beibei/mescroll-body.vue";
 	export default {
-		components: { hrPullLoad },
+		mixins: [MescrollMixin], // 使用mixin (在main.js注册全局组件)
 		data() {
 			return {
+				downOption: {
+					auto: false ,//是否在初始化后,自动执行downCallback; 默认true
+				},
+				upOption: {
+					noMoreSize: 3, //如果列表已无数据,可设置列表的总数量要大于半页才显示无更多数据;避免列表数据过少(比如只有一条数据),显示无更多数据会不好看
+					empty: {
+						tip: '~ 搜索无结果 ~' // 提示
+					}
+				},
 				keyword:'',
 				currentPage:'1',//第几页
 				limit:'10',//每页多少条
 				list: [],
-				isCollection:false,
-				floterText: '数据已加载完',
-				pixelRatio:1,
-				windowHeight:1000,
-				bottomTips:""
+				textLoading:'加载中...',
+				textNoMore:'没有更多了'
 			}
 		},
-		onLoad() {
-			this.getHeight()
-		},
-		mounted() {
-		},
-		methods:{
-			goDetails(poetryId) {
-				uni.navigateTo({
-					url: '/pages/search/details/details?poetryId='+poetryId
-				})
-			},
-			async getHeight() {
-				const res = await uni.getSystemInfo()
-				this.pixelRatio = Number(res[1].pixelRatio)
-				const headHeight = 120 //头部高度 + list的margin-top
-				this.windowHeight = Number(res[1].windowHeight)*this.pixelRatio - headHeight
+		methods: {
+			/*下拉刷新的回调 */
+			downCallback() {
+				//联网加载数据
+			
+				if(true){
+					//联网成功的回调,隐藏下拉刷新的状态
+					this.mescroll.endSuccess();
+					//设置列表数据
+					this.query(true)
+				}
+				else {
+					this.mescroll.endErr();
+				}
 				
 			},
-			refresh: function() {
-			    const _this = this
-			    this.query(true)
-			},
-			loadMore: function() {
-			    this.currentPage++
-				this.bottomTips = "loading";
-			    this.query()
+			/*上拉加载的回调: 其中page.num:当前页 从1开始, page.size:每页数据条数,默认10 */
+			upCallback(page) {
+				//联网加载数据
+				if(true){
+					//联网成功的回调,隐藏下拉刷新的状态
+					this.mescroll.endSuccess();
+					//设置列表数据
+					this.currentPage++
+					this.query()
+				}
+				else {
+					this.mescroll.endErr();
+				}
 			},
 			async query(isRefresh) {
 				if(isRefresh) {
@@ -104,23 +96,18 @@
 					currentPage: this.currentPage
 				})
 				let data = res.data.data
-				if(data.length < 1) {
-					this.bottomTips = 'nomore'
-				}
-				else {
-					this.bottomTips = 'more'
-				}
 				if(isRefresh){
 					this.list = data
 				}
 				else {
 					this.list = this.list.concat(data)
 				}
-				
-				
-				setTimeout(()=>{
-					this.$refs.hrPullLoad.reSet();
-				},300);
+				this.mescroll.endErr();
+				this.mescroll.endSuccess(this.currentPage,0); 
+				console.log(this.list)
+				// this.list = []; // 先清空列表,显示加载进度
+				// this.mescroll.resetUpScroll();
+				// this.mescroll.endErr();
 				// const sss = this.list.map(function (item) {
 				//     return item.value;
 				// }).join(',');
@@ -181,11 +168,18 @@
 				}
 				return str
 			}
-		},
+		}
 	}
 </script>
 
 <style scoped lang="scss">
+	/*说明*/
+	.notice{
+		font-size: 30upx;
+		padding: 40upx 0;
+		border-bottom: 1upx solid #eee;
+		text-align: center;
+	}
 	.body {
 		background:#f3f5f7;
 		.head {
@@ -235,5 +229,8 @@
 			}
 		}
 	}
-	
 </style>
+
+
+
+

@@ -45,6 +45,7 @@
 
 <script>
 	import { getPoetryInfo } from '@/api/search/details/details.js';
+	import { setCollection } from '@/api/collection/setCollection.js';
 	import hrPullLoad from '@/components/common/hr-pull-load/hr-pull-load.vue'
 	export default {
 		components: { hrPullLoad },
@@ -115,90 +116,7 @@
 </script>
 
 <style scoped lang="scss">
-	.red {
-		color:#e54d42;
-	}
-	.orange {
-		color:#f37a1d;
-	}
-	.yellow {
-		color:#fbbd08;
-	}
-	.olive {
-		color:#8dc73f;
-	}
-	.green {
-		color:#3ab54a;
-	}
-	.blue {
-		color:#0081ff;
-	}
-	.purple {
-		color:#6739b6;
-	}
-	.mauve {
-		color:#9c26b0;
-	}
-	.pink {
-		color:#e13998;
-	}
-	.brown {
-		color:#a56740;
-	}
-	.grey {
-		color:#8799a3;
-	}
-	.gray {
-		color:#f0f0f0;
-	}
-	.black {
-		color:#333333;
-	}
-	.white {
-		color:#ffffff;
-	}
-	.bg-red {
-		background-color:#e54d42;
-	}
-	.bg-orange {
-		background-color:#f37a1d;
-	}
-	.bg-yellow {
-		background-color:#fbbd08;
-	}
-	.bg-olive {
-		background-color:#8dc73f;
-	}
-	.bg-green {
-		background-color:#3ab54a;
-	}
-	.bg-blue {
-		background-color:#0081ff;
-	}
-	.bg-purple {
-		background-color:#6739b6;
-	}
-	.bg-mauve {
-		background-color:#9c26b0;
-	}
-	.bg-pink {
-		background-color:#e13998;
-	}
-	.bg-brown {
-		background-color:#a56740;
-	}
-	.bg-grey {
-		background-color:#8799a3;
-	}
-	.bg-gray {
-		background-color:#f0f0f0;
-	}
-	.bg-black {
-		background-color:#333333;
-	}
-	.bg-white {
-		background-color:#ffffff;
-	}
+	
 	.body {
 		background:#f3f5f7;
 		.item {

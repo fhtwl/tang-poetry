@@ -9,7 +9,12 @@
 		{
 			"path": "pages/search/search",
 			"style": {
-				"navigationBarTitleText": "搜索"
+				"navigationBarTitleText": "搜索",
+				"enablePullDownRefresh" : false, // 删除此项: 不开启系统自带的下拉刷新, 默认false
+				"disableScroll": true, // 禁止原生页面滚动, 解决Android小程序下拉卡顿的问题
+				"app-plus" : {
+					"bounce" : "none" // 取消APP端iOS回弹,避免与下拉刷新冲突 (可统一配在 'globalStyle')
+				}
 			}
 		},
 		{
