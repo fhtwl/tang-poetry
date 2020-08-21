@@ -1,4 +1,4 @@
-// 改写手机物理
+// 判断是否登录
 exports.install = function (Vue, obj) {
 	Vue.prototype.isLogin = function(obj) {
 		let token = ''

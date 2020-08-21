@@ -1,22 +1,6 @@
 <template>
 	<view class="body">
-		<!-- <button type="default" @click="query">query</button> -->
-		<!-- <view class="item" v-for="(item,index) in list" :key="index">
-			<view class="title">
-				{{ item.title }}
-			</view>
-			<view class="author">
-				{{ item.author }}
-			</view>
-			<view class="content" v-html="format(item.content)"></view>
-			<view class="operation">
-				<view class="left">
-					<u-icon @tap="collection(item.id,item.author_id)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="28"></u-icon>
-					<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon>
-				</view>
-			</view>
-		</view> -->
-		<!-- <m-slide-list ref="slideList" :multiple="multiple" :list="list" :button="buttonList" :border="true" @click="clickMethod" @change="changeMethod"></m-slide-list> -->
+		<head2 @clickRightBtn="clickRightBtn" back :name="headName" :rightBtn="rightBtn"></head2>
 		<view class="list">
 			<u-swipe-action :show="item.show" :index="index"
 				v-for="(item, index) in list" :key="item.id" 
@@ -26,7 +10,8 @@
 				:disabled="multiple"
 			>
 				<view class="item-box">
-					<view class="multiple" v-show="multiple">
+					<view class="multiple" :class="{active:item.active}" v-show="multiple">
+						<u-icon name="checkbox-mark" color="#fff" size="28"></u-icon>
 					</view>
 					<view class="item u-border-bottom">
 						<view class="title">
@@ -52,7 +37,7 @@
 		</view>
 		
 		<view v-show="multiple" class="delete-content">
-			<button @tap="deleteData" class='co-btn' type="default">删除</button>
+			<button @tap="deleteData" class='btn' type="default">删除</button>
 		</view>
 		<u-toast ref="uToast" />
 	</view>
@@ -92,7 +77,9 @@
 							backgroundColor: '#dd524d'
 						}
 					}
-				]
+				],
+				headName: '收藏',
+				rightBtn: '编辑'
 			}
 		},
 		onLoad() {
@@ -127,16 +114,62 @@
 			}
 		},
 		methods:{
+			clickRightBtn() {
+				if(val == '编辑') {
+					this.rightBtn = '完成'
+					this.multiple = true
+				}
+				else {
+					this.rightBtn = '编辑'
+					this.multiple = false
+				}
+			},
 			goDatails(index) {
-				console.log(index)
+				if(this.multiple) {
+					//编辑状态中
+					this.$forceUpdate()
+					this.list[index].active = !this.list[index].active
+				}
+				else {
+					// 跳转到详情页
+				}
+				console.log(this.list)
 			},
 			click(index, index1) {
-				if(index1 == 0) {
-					this.list.splice(index, 1);
-					this.$u.toast(`删除了第${index}个cell`);
+				if(index1 == 0) { //表示点击删除
+					// this.list.splice(index, 1);
+					let collectionId = this.list[index].id
+					uni.showModal({
+					    title: '提示',
+					    content: '确定删除吗？',
+					    success: async (res)=> {
+					        if (res.confirm) {
+								let _this = this 
+								let res = await setCollection({
+									type: '2',
+									collectionId
+								})
+								if(res.data.success) {
+									this.$refs.uToast.show({
+										title: '删除成功',
+										type: 'success', 
+									})
+									this.query(true)
+								}
+								else {
+									this.$refs.uToast.show({
+										title: '删除失败',
+										type: 'error', 
+									})
+								}
+								
+					        } else if (res.cancel) {
+					            
+					        }
+					    }
+					});
 				} else {
-					this.list[index].show = false;
-					this.$u.toast(`收藏成功`);
+				
 				}
 			},
 			// 如果打开一个的时候，不需要关闭其他，则无需实现本方法
@@ -172,40 +205,44 @@
 				}
 			},
 			deleteData(item) {
-				let data = this.$refs.slideList.delete()
-				if(item && item.id) {
-					data = [item]
-				}
+				// let data = this.$refs.slideList.delete()
+				let data = []
+				let collectionIdArr = []
+				data = this.list.filter((v,i)=> {
+					if(v.active) {
+						collectionIdArr.push(v.id)
+					}
+					return v.active
+				})
+				let collectionId = collectionIdArr.toString()
 				if(data.length > 0 && data[0].id) {
 					uni.showModal({
 					    title: '提示',
 					    content: '确定删除吗？',
-					    success: (res)=> {
+					    success: async (res)=> {
 					        if (res.confirm) {
 								let _this = this 
-								
-								
 					            uni.showLoading({
 					            	title:'加载中',
 					            	mask:true
 					            })
-					            this.requestAjax({
-					            	url: '/api/market/goodsCenter/goods/control/deleteFavoritesApp.do',
-					            	data: {
-										datamsg:JSON.stringify(data)
-									},
-					            	success: function(res) {
-					            		if (res.data.success) {
-					            			uni.hideLoading()
-					            			let temdata = res.data.data
-					            			_this.getData()
-					            		} else {
-					            			
-					            		}
-					            		uni.hideLoading()
-					            
-					            	},
+					            let res = await setCollection({
+					            	type: '2',
+					            	collectionId
 					            })
+					            if(res.data.success) {
+					            	this.$refs.uToast.show({
+					            		title: '取消收藏成功',
+					            		type: 'success', 
+					            	})
+					            	this.query(true)
+					            }
+					            else {
+					            	this.$refs.uToast.show({
+					            		title: '取消收藏失败',
+					            		type: 'error', 
+					            	})
+					            }
 								
 					        } else if (res.cancel) {
 					            
@@ -297,25 +334,6 @@
 					})
 				}
 			},
-			async cancelCollection(collectionId) {
-				let res = await setCollection({
-					type: '2',
-					collectionId
-				})
-				if(res.data.success) {
-					this.$refs.uToast.show({
-						title: '取消收藏成功',
-						type: 'success', 
-					})
-					this.query()
-				}
-				else {
-					this.$refs.uToast.show({
-						title: '取消收藏失败',
-						type: 'error', 
-					})
-				}
-			},
 			format(val) {
 				let arr = val.split('|')
 				let str = ''
@@ -331,18 +349,6 @@
 <style scoped lang="scss">
 	.body {
 		background:#f3f5f7;
-		.head {
-			padding:0 20rpx;
-			height:100rpx;
-			display: flex;
-			align-items: center;
-			width:100%;
-			box-sizing: border-box;
-			background:#fff;
-			u-search {
-				flex:1;
-			}
-		}
 		.list {
 			width:100%;
 			margin-top:20rpx;
@@ -383,16 +389,38 @@
 				
 			}
 			.multiple {
-				width:50rpx;
-				height:50rpx;
+				min-width:50rpx;
+				min-height:50rpx;
 				border:1rpx solid #ccc;
 				border-radius: 50%;
 				margin-left:40rpx;
 				margin-right:20rpx;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.multiple.active {
+				background-color: $color;
+				border-color: transparent;
 			}
 			.item-box {
 				display: flex;
 				align-items: center;
+			}
+		}
+		.delete-content {
+			width: 100%;
+			height: 140rpx;
+			background: #fff;
+			position: fixed;
+			bottom: 0;
+			padding-top:20rpx;
+			box-sizing: border-box;
+			box-shadow: 0 0 6rpx 6rpx #eee;
+			.btn {
+				width: 700rpx;
+				background-color: #e54d42;
+				color: #fff;
 			}
 		}
 	}

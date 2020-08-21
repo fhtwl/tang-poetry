@@ -7,18 +7,18 @@
 			
 			 <u-toast ref="uToast" />
 			<view class="list">
-			 	<view @tap="goDetails(item.id)" class="item" v-for="(item,index) in list" :key="index">
-			 		<view class="title">
+			 	<view class="item" v-for="(item,index) in list" :key="index">
+			 		<view @tap="goDetails(item.id)" class="title">
 			 			{{ item.title }}
 			 		</view>
-			 		<view class="author">
+			 		<view @tap="goDetails(item.id)" class="author">
 			 			{{ item.author }}
 			 		</view>
-			 		<view class="content" v-html="format(item.content)"></view>
+			 		<view @tap="goDetails(item.id)" class="content" v-html="format(item.content)"></view>
 			 		<view class="operation">
 			 			<view class="left">
 			 				<u-icon @tap="collection(item.id,item.author_id,index)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="28"></u-icon>
-			 				<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon>
+			 				<u-icon @tap="cancelCollection(item.collection_id,index)" v-else name="heart-fill" color="#f00" size="28"></u-icon>
 			 			</view>
 			 		</view>
 			 	</view>
@@ -57,6 +57,12 @@
 			}
 		},
 		methods: {
+			// 点击进入诗详情
+			goDetails(id) {
+				uni.navigateTo({
+					url: '/pages/search/details/details?poetryId='+id
+				})
+			},
 			/*下拉刷新的回调 */
 			downCallback() {
 				//联网加载数据
@@ -95,16 +101,18 @@
 					limit: this.limit,
 					currentPage: this.currentPage
 				})
-				let data = res.data.data
-				if(isRefresh){
-					this.list = data
+				if (res.data.success) {
+					let data = res.data.data
+					if(isRefresh){
+						this.list = data
+					}
+					else {
+						this.list = this.list.concat(data)
+					}
 				}
-				else {
-					this.list = this.list.concat(data)
-				}
+				
 				this.mescroll.endErr();
 				this.mescroll.endSuccess(this.currentPage,0); 
-				console.log(this.list)
 				// this.list = []; // 先清空列表,显示加载进度
 				// this.mescroll.resetUpScroll();
 				// this.mescroll.endErr();
@@ -141,17 +149,18 @@
 					})
 				}
 			},
-			async cancelCollection(collectionId) {
+			async cancelCollection(collectionId,index) {
 				let res = await setCollection({
 					type: '2',
 					collectionId
 				})
 				if(res.data.success) {
+					this.list[index].collection_id = null
 					this.$refs.uToast.show({
 						title: '取消收藏成功',
 						type: 'success', 
 					})
-					this.query()
+					// this.query()
 				}
 				else {
 					this.$refs.uToast.show({

@@ -50,7 +50,15 @@
 		{
 			"path": "pages/user/collection/collection",
 			"style": {
-				"navigationBarTitleText": "收藏"
+				"navigationBarTitleText": "收藏",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/user/avatars/avatars",
+			"style": {
+				"navigationBarTitleText": "头像",
+				"navigationStyle": "custom"
 			}
 		}
 	],
@@ -100,6 +108,11 @@
 				"name": "details", //模式名称
 				"path": "pages/search/details/details", //启动页面，必选
 				"query": "poetryId=29309" //启动参数，在页面的onLoad函数里面得到
+			},
+			{
+				"name": "avatars", //模式名称
+				"path": "pages/user/avatars/avatars", //启动页面，必选
+				"query": "" //启动参数，在页面的onLoad函数里面得到
 			}
 		]
 	}

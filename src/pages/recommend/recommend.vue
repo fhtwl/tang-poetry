@@ -16,6 +16,8 @@
 			</view>
 			<view class="caozuo">
 				<u-icon name="heart" color="#aaa" size="36" class="collection"></u-icon>
+				<!-- <u-icon @tap="collection(item.id,item.author_id,index)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="36" class="collection"></u-icon>
+				<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon> -->
 				<u-icon name="zhuanfa" color="#aaa" size="36"></u-icon>
 				
 			</view>

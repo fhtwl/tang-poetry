@@ -1,15 +1,15 @@
 <template>
 	<view class="body">
 		<!-- <button class="btn_login" open-type="getPhoneNumber" @getphonenumber="toLogin">立即登录</button> -->
-		<view class="u-flex user-box u-p-l-30 u-p-r-20">
-			<view class="u-m-r-20 avatar">
+		<view class="u-flex user-box u-p-l-30 u-p-r-20 u-skeleton">
+			<view @click="goAvatars" class="u-m-r-20 avatar u-skeleton-circle">
 				<u-avatar :src="userInfo.info.avatar | avatar" size="120"></u-avatar>
 			</view>
 			<view class="u-flex-1" v-show="userInfo.nick_name">
-				<view class="u-font-18 u-p-b-20">{{ userInfo.nick_name }}</view>
-				<view class="u-font-14 u-tips-color">普通用户</view>
+				<view class="u-font-18 u-skeleton-fillet username">{{ userInfo.nick_name }}</view>
+				<view class="u-font-14 u-m-t-20 u-tips-color u-skeleton-fillet">普通用户</view>
 			</view>
-			<view @tap="goLogin" class="u-flex-1" v-show="!userInfo.nick_name">
+			<view @tap="goLogin" class="u-flex-1 u-skeleton-fillet" v-show="!userInfo.nick_name">
 				<view class="u-font-14 u-tips-color">登录</view>
 			</view>
 			<view class="u-m-l-10 u-p-10">
@@ -23,7 +23,7 @@
 			</u-cell-group>
 		</view>
 		
-		<view class="u-m-t-20">
+		<view class="u-m-t-20 ">
 			<u-cell-group>
 				<u-cell-item icon="setting" title="设置"></u-cell-item>
 				<u-cell-item v-if="!!token" @tap="open" icon="close-circle" title="退出登录"></u-cell-item>
@@ -43,6 +43,7 @@
 		</view> -->
 		<u-modal v-model="show" :content="content" @confirm="cancellation" :show-cancel-button="true"></u-modal>
 		<u-toast ref="uToast" />
+		<u-skeleton :loading="loading" :animation="true" bgColor="#FFF"></u-skeleton>
 	</view>
 </template>
 
@@ -52,6 +53,8 @@
 	import { verifyToken } from '@/api/user/verifyToken.js'; 
 	import { getUserInfo } from '@/api/user/getUserInfo.js';
 	import { cancellation } from '@/api/user/cancellation.js';
+	import { add } from '@/api/upload/add.js';
+	import Configuration from '@/config.js';
 	export default {
 		data() {
 			let userInfo = this.$store.state.userInfo
@@ -61,7 +64,8 @@
 				userInfo: userInfo,
 				token: token,
 				show: false,
-				content: '确认退出登录？'
+				content: '确认退出登录？',
+				loading:true
 			}
 		},
 		async onShow() {
@@ -70,12 +74,27 @@
 		},
 		filters:{
 			avatar(val) {
-				if(!val && !val.avatar) {
+				if(!val) {
 					return '/static/images/user/touxiang-icon@2x.png'
+				}
+				else {
+					return val
 				}
 			}
 		},
 		methods:{
+			goAvatars() {
+				if(!this.isLogin()) {
+					this.$refs.uToast.show({
+						title: '请先登录',
+						type: 'error', 
+					})
+					return false
+				}
+				uni.navigateTo({
+					url: '/pages/user/avatars/avatars?url='+this.userInfo.info.avatar
+				})
+			},
 			open() {
 				this.show = true;
 				
@@ -117,15 +136,25 @@
 			},
 			async getUserInfo() {
 				let token = this.isLogin()
-				const res = await getUserInfo({token})
-				const result = res.data
-				console.log(result)
-				if(result.success) {
-					this.$store.commit('modifyUserInfo',result.data)
-					this.userInfo = result.data
+				if(token) {
+					const res = await getUserInfo({token})
+					const result = res.data
+					console.log(result)
+					if(result.success) {
+						this.$store.commit('modifyUserInfo',result.data)
+						this.userInfo = result.data
+						if(this.userInfo.info && typeof this.userInfo.info === 'string') {
+							this.userInfo.info = JSON.parse(this.userInfo.info)
+							this.userInfo.info.avatar = Configuration.domain + Configuration.public + '/' + this.userInfo.info.avatar
+						}
+						
+					}
+					else {
+					}
 				}
-				else {
-				}
+				this.$forceUpdate()
+				this.loading = false
+				
 			},
 			goLogin() {
 				uni.navigateTo({
@@ -152,6 +181,10 @@
 		height: 160rpx;
 		.avatar {
 			font-size: 0;
+		}
+		.username {
+			width:100%;
+			height: 48rpx;
 		}
 	}
 </style>
