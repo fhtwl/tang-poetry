@@ -3,28 +3,28 @@
 		<view class="head">
 			<view class="date">
 				<view class="day">
-					NO.<text class="num">14</text>
+					NO.<text class="num">{{ day }}</text>
 				</view>
 				<view class="day-right">
 					<view class="month">
-						八月
+						{{ month }}月
 					</view>
 					<view class="year">
-						2020
+						{{ year }}
 					</view>
 				</view>
 			</view>
 			<view class="caozuo">
-				<u-icon name="heart" color="#aaa" size="36" class="collection"></u-icon>
-				<!-- <u-icon @tap="collection(item.id,item.author_id,index)" v-if="item.collection_id === null || item.collection_id === undefined" name="heart" color="#ccc" size="36" class="collection"></u-icon>
-				<u-icon @tap="cancelCollection(item.collection_id)" v-else name="heart-fill" color="#f00" size="28"></u-icon> -->
+				<!-- <u-icon @click="collection(info.id,info.author_id)" name="heart" color="#aaa" size="36" class="collection"></u-icon> -->
+				<u-icon @tap="$u.throttle(collection(info.id,info.author_id),500)" v-if="info.collection_id === null || info.collection_id === '' || info.collection_id === undefined" name="heart" color="#ccc" size="36" class="collection"></u-icon>
+				<u-icon @tap="$u.throttle(cancelCollection(info.collection_id),500)" v-else name="heart-fill" color="#f00" size="36" class="collection"></u-icon>
 				<u-icon name="zhuanfa" color="#aaa" size="36"></u-icon>
 				
 			</view>
 		</view>
 		<view class="color bg-purple">
 			<view class="text gray u-skeleton-circle">
-				仙
+				{{ info.content | initials}}
 			</view>
 			<view class="type">
 				<view class="white">
@@ -51,13 +51,14 @@
 				<u-icon name="heart" color="#ccc" size="36"></u-icon>
 			</view> -->
 		</view>
+		<u-toast ref="uToast" />
 		<u-skeleton :loading="loading" :animation="true" bgColor="#FFF"></u-skeleton>
 	</view>
 </template>
 
 <script>
-	import { getPoetryInfo } from '@/api/search/details/details.js';
 	import { setCollection } from '@/api/collection/setCollection.js';
+	import { getRecommendInfo } from '@/api/recommend/getRecommendInfo.js';
 	export default {
 		data() {
 			return {
@@ -68,19 +69,37 @@
 					intro: '',
 					title: ''
 				},
-				loading:true
+				loading:true,
+				year:'',
+				month: '',
+				day: ''
 			}
 		},
 		onLoad() {
-			this.poetryId = '19435'
-			this.getPoetryInfo()
+			this.init()
+			this.getRecommendInfo()
 
 		},
+		filters: {
+			initials(val) {
+				return val.substring(0,1)
+			}
+		},
 		methods: {
-			async getPoetryInfo() {
-				let res = await getPoetryInfo({
-					poetryId:this.poetryId
+			init() {
+				const date = new Date()
+				this.year = date.getFullYear()
+				const month = date.getMonth()
+				this.day = date.getDate()
+				const numArr = [0,1,2,3,4,5,6,7,8,9,10,11]
+				const chineseArr = ['一','二','三','四','五','六','七','八','九','十','十一','十二']
+				let index = numArr.findIndex((v,i)=> {
+					return v === month
 				})
+				this.month = chineseArr[index]
+			},
+			async getRecommendInfo() {
+				let res = await getRecommendInfo()
 				if(res.data.success) {
 					this.info = res.data.data[0]
 				}
@@ -92,6 +111,34 @@
 				}
 				this.loading = false
 			},
+			async collection(poetryId,authorId,index) {
+				if(!this.isLogin()) {
+					this.$refs.uToast.show({
+						title: '请先登录',
+						type: 'error', 
+					})
+					return false
+				}
+				let res = await setCollection({
+					type: '1',
+					poetryId,
+					authorId
+				})
+				if(res.data.success) {
+					this.$refs.uToast.show({
+						title: '收藏成功',
+						type: 'success', 
+					})
+					this.info.collection_id = res.data.id
+					// this.query()
+				}
+				else {
+					this.$refs.uToast.show({
+						title: '收藏失败',
+						type: 'success', 
+					})
+				}
+			},
 			async cancelCollection(collectionId) {
 				let res = await setCollection({
 					type: '2',
@@ -102,7 +149,6 @@
 						title: '取消收藏成功',
 						type: 'success', 
 					})
-					this.query()
 				}
 				else {
 					this.$refs.uToast.show({
@@ -229,6 +275,9 @@
 				// height:112rpx;
 				font-size: 30rpx;
 				text-align: center;
+				background: #FFF;
+				padding: 10rpx 10rpx;
+				border-radius: 6rpx;
 				// background: url('~@/static/images/title-bg.png') no-repeat top center;
 				// background-size: 100% auto;
 			}

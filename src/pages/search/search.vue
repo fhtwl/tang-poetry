@@ -80,6 +80,7 @@
 			},
 			/*上拉加载的回调: 其中page.num:当前页 从1开始, page.size:每页数据条数,默认10 */
 			upCallback(page) {
+				console.log(page)
 				//联网加载数据
 				if(true){
 					//联网成功的回调,隐藏下拉刷新的状态
@@ -101,18 +102,24 @@
 					limit: this.limit,
 					currentPage: this.currentPage
 				})
+				let count = 0
+				let next = true
 				if (res.data.success) {
 					let data = res.data.data
+					// count = data.count
 					if(isRefresh){
-						this.list = data
+						this.list = data.data
 					}
 					else {
-						this.list = this.list.concat(data)
+						this.list = this.list.concat(data.data)
+					}
+					if(data.data.length < 10) {
+						next = false
 					}
 				}
-				
 				this.mescroll.endErr();
-				this.mescroll.endSuccess(this.currentPage,0); 
+				this.mescroll.endSuccess(this.limit,next)
+				// this.mescroll.endBySize(this.limit,count); 
 				// this.list = []; // 先清空列表,显示加载进度
 				// this.mescroll.resetUpScroll();
 				// this.mescroll.endErr();
@@ -140,7 +147,6 @@
 						title: '收藏成功',
 						type: 'success', 
 					})
-					// this.query()
 				}
 				else {
 					this.$refs.uToast.show({

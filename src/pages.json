@@ -44,7 +44,7 @@
 		{
 			"path": "pages/user/loginPage/loginType",
 			"style": {
-				"navigationBarTitleText": "登录方式"
+				"navigationBarTitleText": "微信登录"
 			}
 		},
 		{

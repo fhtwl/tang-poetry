@@ -2,14 +2,14 @@
 	<view class="body">
 		<!-- <button class="btn_login" open-type="getPhoneNumber" @getphonenumber="toLogin">立即登录</button> -->
 		<view class="u-flex user-box u-p-l-30 u-p-r-20 u-skeleton">
-			<view @click="goAvatars" class="u-m-r-20 avatar u-skeleton-circle">
+			<view @click="goAvatars" class="u-m-r-30 avatar u-skeleton-circle">
 				<u-avatar :src="userInfo.info.avatar | avatar" size="120"></u-avatar>
 			</view>
 			<view class="u-flex-1" v-show="userInfo.nick_name">
 				<view class="u-font-18 u-skeleton-fillet username">{{ userInfo.nick_name }}</view>
 				<view class="u-font-14 u-m-t-20 u-tips-color u-skeleton-fillet">普通用户</view>
 			</view>
-			<view @tap="goLogin" class="u-flex-1 u-skeleton-fillet" v-show="!userInfo.nick_name">
+			<view @tap="showSheet" class="u-flex-1 u-skeleton-fillet login" v-show="!userInfo.nick_name">
 				<view class="u-font-14 u-tips-color">登录</view>
 			</view>
 			<view class="u-m-l-10 u-p-10">
@@ -44,6 +44,7 @@
 		<u-modal v-model="show" :content="content" @confirm="cancellation" :show-cancel-button="true"></u-modal>
 		<u-toast ref="uToast" />
 		<u-skeleton :loading="loading" :animation="true" bgColor="#FFF"></u-skeleton>
+		<u-action-sheet :list="list" v-model="sheetShow" @click="clickSheet" :tips="tips" :cancel-btn="true"></u-action-sheet>
 	</view>
 </template>
 
@@ -65,7 +66,23 @@
 				token: token,
 				show: false,
 				content: '确认退出登录？',
-				loading:true
+				loading:true,
+				sheetShow: false,
+				list: [
+					{
+						text: '微信登录',
+						// color: 'blue',
+						// fontSize: 28
+					}, 
+					{
+						text: '用户名登录'
+					},
+				],
+				tips: {
+					text: '登录方式选择',
+					color: '#909399',
+					fontSize: 24
+				}
 			}
 		},
 		async onShow() {
@@ -83,6 +100,22 @@
 			}
 		},
 		methods:{
+			showSheet() {
+				this.sheetShow = true
+			},
+			clickSheet(index) {
+				if(index == 1) {
+					uni.navigateTo({
+						url: '/pages/user/loginPage/login'
+					})
+				}
+				else if(index == 0){
+					uni.navigateTo({
+						url: '/pages/user/loginPage/loginType'
+					})
+				}
+				console.log(`点击了第${index + 1}项，内容为：${this.list[index].text}`)
+			},
 			goAvatars() {
 				if(!this.isLogin()) {
 					this.$refs.uToast.show({
@@ -181,6 +214,12 @@
 		height: 160rpx;
 		.avatar {
 			font-size: 0;
+			
+		}
+		.login {
+			height: 100%;
+			display: flex;
+			align-items: center;
 		}
 		.username {
 			width:100%;

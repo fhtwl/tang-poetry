@@ -3,7 +3,7 @@
 		<view class="btn">
 			<u-button type="primary" @getuserinfo="toLogin" open-type="getUserInfo">微信登录/未注册会直接注册</u-button>
 		</view>
-		<view class="btn">
+		<!-- <view class="btn">
 			<u-button type="primary" @click="goUserNameLogin">用户名登录</u-button>
 		</view>
 		<view class="btn">
@@ -11,7 +11,7 @@
 		</view>
 		<view class="btn">
 			<u-button @click="verify" type="primary" class="btn">验证token</u-button>
-		</view>
+		</view> -->
 		<u-toast ref="uToast" />
 	</view>
 </template>
